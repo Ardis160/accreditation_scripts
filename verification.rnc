@@ -1,0 +1,403 @@
+namespace tmpl="https://ki.ujep.cz/template"
+
+html_text = element html_text {
+  ( element p {p_obsah}
+  | element div { text }
+  | element ol { li+ }
+  | element ul { li+ }  
+  | element b { b_obsah }
+  | element i { i_obsah }
+  | text
+  | ref 
+  | element span { text }
+  )*
+}
+
+span = element span {text}
+b = element b { b_obsah }
+i = element i { i_obsah }
+li = element li { li_obsah }
+ref = element ref {attribute idref {text}}
+
+li_obsah = (
+  (text | li | ref) *
+)
+
+p_obsah = (
+   (text | b | i | span | ref )*
+)
+
+b_obsah = (
+   (text | ref)*
+)
+
+i_obsah = (
+   (text | ref)*
+)
+
+specifikace_kapacit = 
+element specifikace_kapacit
+{
+   element učebna_kapacita {
+      attribute název {text},
+      attribute kapacita {xsd:positiveInteger}
+   },
+   element pronájem {
+      xsd:nonNegativeInteger # & . <= ../@kapacita/positiveInteger
+   },
+   element platnost_nájmu {xsd:date?}*
+}+
+
+specifikace_výuky =
+
+ element specifikace_výuky 
+ {
+   element rozsah {
+      attribute jednotka {"h/týden" | "h/sem" | "den/sem"},
+      element počet {xsd:positiveInteger}
+      },
+   element vyučující_ref {xsd:token}
+}
+
+řízení = 
+element řízení 
+{
+   element obor{text},
+   element rok {xsd:gYear?},
+   element vš {text}      
+}
+
+start = žádost
+
+žádost = element žádost {
+   element program {
+         element jméno {text},
+         element názevvš {text},
+         element názevsoučástivš {text}*,
+         element spolupracujícíinstituce {text}?,
+         element typžádosti {"udělení" | "prodloužení" | "rozšíření"},
+         element typprogramu {"bakalářský" | "navazující magisterský"},
+         element profilprogramu {"akademicky zaměřený" | "profesně zaměřený"},
+         element formastudia {"prezenční" | "kombinovaná"},
+         element dobastudia {xsd:positiveInteger}, # & ((@typprogramu = "bakalářský" & . = 3) | (@typprogramu = "navazující magisterský" & . = 2)),
+         element jazyk {"cs" | "en" },
+         element schvalujícíorgán {text},
+         element titul {text}, # & @typprogramu = "bakalářský" & @titul = "Bc." | element titul {text} & @typprogramu = "navazující magisterský" & @titul = "Mgr.",  #přidat inženýra
+         element rigoróznířízení {xsd:boolean}?, #& @typprogramu = "navazující magisterský",
+         element rigoróznířízení_titul {text}?,
+         element garant_ref {xsd:token},
+         element zaměřenívýkonu {xsd:boolean},
+         element zaměřeníodborníků {xsd:boolean},
+         element uznávacíorgán {text},
+         element oblastivzdělávání {
+            element oblast {
+               attribute jméno_oblasti {text}?,
+               attribute procentuálnost {xsd:positiveInteger { maxInclusive = "100" }?}
+            }+
+         },
+         element cílestudia {html_text},
+         element profilabsolventa {html_text},
+         element uplatnitelnostabsolventů {html_text},
+         element pravdidlapodmínkyprotvorbu {html_text},
+         element podmínkypřijetí {html_text},
+         element početuchazečů {text},
+         element návaznost {text},
+         element datumschválenížádosti {xsd:date},
+         element elpodobažádosti {xsd:anyURI}?,
+         element studijníopory {xsd:anyURI}?, #  & @formastudia = "kombinovaná",
+         element praxe_odkaz {xsd:anyURI}?,
+         element vnitřnípředpisy {xsd:anyURI}?,
+         element vnitřníhodnocení {xsd:anyURI}?,
+         element plán_ref {xsd:token}+,
+         element záměrrozvoje {text},
+         element systémvýuky{text}?, # & @formastudia = "kombinovaná",
+         element praxe {
+            element charakteristika_praxe {text},
+            element rozsah_tydny {xsd:positiveInteger},
+            element rozsah_hodiny {xsd:positiveInteger},
+            element pracoviště_praxe {
+               element pracoviště {
+                  attribute název_pracoviště{text},
+                  attribute zajištěnost_smlouvy{xsd:boolean}
+               }+
+            }
+         }+,
+         element související_činnost {
+            element akademicky {
+               element řešitel {text},
+               element název {text},
+               element zdroj {
+                  attribute typ {
+                     "A" | "B" | "C" | "D"},
+                  attribute finance{text} #název instituce nebo právnické osoby, která výzkumný projekt financovala
+                  },
+                element od {
+                  xsd:token { pattern = "\d{2}/\d{4}" }
+               },
+               element do {
+                  xsd:token { pattern = "\d{2}/\d{4}" }
+               }
+            }*,
+            element profesně {
+               element pracoviště {xsd:string},
+               element název {text},
+               element od {
+                  xsd:token { pattern = "\d{2}/\d{4}" }
+               },
+               element do {
+                  xsd:token { pattern = "\d{2}/\d{4}" }
+               }
+            }*,
+            element odborné_aktivity {text},
+            element praxe_spolupráce {text}
+         }*,
+         element informační_zabezpečení {
+            element název_popis {text},
+            element literatura {text},
+            element databáze {xsd:anyURI},
+            element antiplag_systém {text}
+         },
+         element materiální_zabezpečení {
+            element místo {text},
+
+            element výukové_místnosti{
+                specifikace_kapacit+
+            },
+
+            element odborné_učebny{
+               specifikace_kapacit+
+            },
+            element hygiena {text}*,
+            element rovný_přístup {text}*
+         },
+         element finanční_zabezpečení {
+            attribute státní_rozpočet {xsd:boolean},
+            element zhodnocení {text}? # & @státní_rozpočet="true"
+         },
+         element plány {
+            element plán {
+               attribute tmpl:merge {xsd:token}?,
+               attribute id {xsd:token},
+               element id_kombinovaného {xsd:token}?,
+               element označení {text},
+               element skupiny {
+                  element skupina_id {xsd:token}+
+               },
+               element součásti_szz {html_text?},
+               element návrhtémat {
+                  element téma{text}*
+               },
+               element studijnípovinnosti {text},
+               element návrhtémat_rigorózní {
+                  element téma_rigorózní{text}*
+               }?, # & .\@typprogramu = "navazující magisterský",
+               element součásti_srz {html_text?}? #& .\@typprogramu = "navazující magisterský"
+            }+
+         },
+
+         element skupiny_předmětů {
+            element skupina_předmětů {
+               attribute id {xsd:token},
+               element typ  {"pk" | "pvk" | "vk"}?,
+               element označení {text},
+               element předměty {
+                  element předmět_id {xsd:token}+
+               },
+               element podmínky_splnění {text}?
+            }+
+         },
+
+         element předměty {
+            element předmět {
+            attribute tmpl:merge {xsd:token}?,
+            attribute id {xsd:token},
+            element název {text},
+            element typ  {"ZT" | "PZ"}?,
+            element ročník {xsd:positiveInteger},  #& ((@typprogramu = "bakalářský" & . <= 3) |(@typprogramu = "navazující magisterský" & . <= 2)),
+            element semestr {"ZS" | "LS" },
+            element počet_kreditů {xsd:positiveInteger},
+            element prerekvizity {xsd:token}?,
+            element ověření_výsledků {"zápočet" | "zkouška" | "zápočet se zkouškou"},
+            element forma_ověření {text},
+            element výuka {
+               element plán {
+                  attribute id {xsd:token},
+                  (
+                     element přednáška {
+                        specifikace_výuky 
+                     }?,
+                     element seminář {
+                        specifikace_výuky
+                     }?,
+                     element cvičení {
+                        (
+                           element paralelní_skupina {
+                           specifikace_výuky
+                        }*
+                        |
+                        specifikace_výuky
+                        )
+                     }?
+                  )
+               }+
+            },
+
+            element anotace {
+               html_text
+            },
+            element garant_ref {xsd:token},
+            element studijníliteratura {text},
+            element konzultace {
+               element rozsah {xsd:positiveInteger},
+               element info {text}
+            } #& .\@formastudia = "kombinovaná"
+         }+
+         },
+         element učitelé {
+            element vyučující {
+            attribute id {xsd:token},
+            element jméno_příjmení {text},
+            element rok_narození {xsd:gYear},
+            element typ_vztahu {"PP" | "DPP/DPČ"},
+            element tituly_před {text}?,
+            element tituly_za {text}?,
+            element vš_vztah {
+               element rozsah {xsd:positiveInteger},
+               element dokdy {
+                  xsd:token { pattern = "N|\d{2}/\d{4}" }
+               }
+            },
+
+            element součástvš_vztah {
+               element typ_vztahu {"PP" | "DPP/DPČ"},
+               element rozsah {xsd:positiveInteger},
+               element dokdy {
+                  xsd:token { pattern = "N|\d{2}/\d{4}" }
+               }
+            }*,
+            element jiné_vš {
+               element název_sídlo {text},
+               element typ_vztahu {"PP" | "DPP" | "DPČ"},
+               element rozsah {xsd:positiveInteger}
+            }*,
+            #Předměty příslušného studijního programu a způsob zapojení do jejich výuky, příp. další zapojení do uskutečňování studijního programu
+            element jiné_programy {
+               element jiný_předmět {text},
+               element jiný_program {text},
+               element semestr {"ZS" | "LS" },
+               element role {"vyučující" | "přednášející" | "cvičící"},
+               element počet_hodin {xsd:positiveInteger}?
+            }*,
+            element vzdělání {
+               element studium {
+                  element vš_fakulta {text},
+                  element studijní_program {text},
+                  element obor {text}?,
+                  element max_vzdělání {text},
+                  element od {xsd:gYear},
+                  element do {xsd:gYear?}?
+               }+
+            },
+            element odborné_působení {
+               element působení {
+                  element zaměstnavatel{text},
+                  element pozice{text},
+                  element od {xsd:gYear},
+                  element do {xsd:gYear?}?,
+                  element typ_vztahu {"PP" | "DPP/DPČ"}
+               }
+            }*,
+            element zkušenosti {
+               element bakalářská {xsd:positiveInteger}?,
+               element diplomová {xsd:positiveInteger}?,
+               element dizertační {xsd:positiveInteger}?
+            }?,
+            element habilitační_řízení {
+               řízení           
+            }?,
+            element jmenovací_řízení {
+               řízení            
+            }?,
+            element ohlasy {
+               element wos {xsd:positiveInteger},
+               element scopus {xsd:positiveInteger},
+               element ostatní {xsd:positiveInteger}
+            }?,
+            element publikační_činnost {text}?,
+            element zahraničí {text}?
+            }+
+         }
+      },
+
+      element sablony {
+          element plán {
+               attribute xml:id {xsd:token},
+               element označení {text},
+               element skupiny_předmětů {
+                  element skupina_id {xsd:token}+
+               },
+               element součásti_szz {html_text},
+               element návrhtémat {
+                  element téma{text}*
+               },
+               element studijnípovinnosti {text},
+               element návrhtémat_rigorózní {
+                  element téma_rigorózní{text}*
+               }?, # & .\@typprogramu = "navazující magisterský",
+               element součásti_srz {html_text?}? #& .\@typprogramu = "navazující magisterský"
+            }*,
+
+            element předmět {
+            attribute xml:id {xsd:token},
+            element název {text},
+            element typ  {"ZT" | "PZ"}?,
+            element ročník {xsd:positiveInteger},  #& ((@typprogramu = "bakalářský" & . <= 3) |(@typprogramu = "navazující magisterský" & . <= 2)),
+            element semestr {"ZS" | "LS" },
+            element počet_kreditů {xsd:positiveInteger},
+            element prerekvizity {xsd:token}?,
+            element ověření_výsledků {"zápočet" | "zkouška" | "zápočet se zkouškou"},
+            element forma_ověření {text},
+            element výuka {
+               element plán {
+                  attribute id {xsd:token},
+                  (
+                     element přednáška {
+                        specifikace_výuky
+                     }?,
+                     element seminář {
+                        specifikace_výuky
+                     }?,
+                     element cvičení {
+                        (element paralelní_skupina {
+                           specifikace_výuky
+                        }*
+                        |
+                           specifikace_výuky
+                        )
+                     }?
+                  )
+               }+
+               },
+            element anotace {
+               html_text
+            },
+
+            element garant_ref {xsd:token},
+            element studijníliteratura {text},
+            element konzultace {
+               element rozsah {xsd:positiveInteger},
+               element info {text}
+            } #& .\@formastudia = "kombinovaná"
+         }*
+      }
+      
+   }
+
+
+
+
+
+
+
+
+
