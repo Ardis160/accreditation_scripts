@@ -1,6 +1,5 @@
 from lxml import etree
 
-
 def merge_elements(target_element, source_element):
     # Projdeme všechny děti zdrojového elementu
     for source_child in source_element:
@@ -31,7 +30,8 @@ def recursive_merge(target_element, source_element, source_elements):
 
 def perform_merge(xml_file):
     # Načteme XML dokument
-    tree = etree.parse(xml_file)
+    parser = etree.XMLParser(resolve_entities=False)
+    tree = etree.parse(xml_file, parser=parser)
     root = tree.getroot()
 
     # Vytvoříme slovník, kde klíče budou hodnoty atributu xml:id a hodnoty budou samotné elementy
@@ -60,6 +60,3 @@ def perform_merge(xml_file):
 
     with open('merged_program.xml', 'wb') as output_file:
         output_file.write(xml_string)
-
-# Použití funkce pro mergování
-perform_merge('zadost3.xml')
