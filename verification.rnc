@@ -327,70 +327,7 @@ start = žádost
             element zahraničí {text}?
             }+
          }
-      },
-
-      element sablony {
-          element plán {
-               attribute xml:id {xsd:token},
-               element označení {text},
-               element skupiny_předmětů {
-                  element skupina_id {xsd:token}+
-               },
-               element součásti_szz {html_text},
-               element návrhtémat {
-                  element téma{text}*
-               },
-               element studijnípovinnosti {text},
-               element návrhtémat_rigorózní {
-                  element téma_rigorózní{text}*
-               }?, # & .\@typprogramu = "navazující magisterský",
-               element součásti_srz {html_text?}? #& .\@typprogramu = "navazující magisterský"
-            }*,
-
-            element předmět {
-            attribute xml:id {xsd:token},
-            element název {text},
-            element typ  {"ZT" | "PZ"}?,
-            element ročník {xsd:positiveInteger},  #& ((@typprogramu = "bakalářský" & . <= 3) |(@typprogramu = "navazující magisterský" & . <= 2)),
-            element semestr {"ZS" | "LS" },
-            element počet_kreditů {xsd:positiveInteger},
-            element prerekvizity {xsd:token}?,
-            element ověření_výsledků {"zápočet" | "zkouška" | "zápočet se zkouškou"},
-            element forma_ověření {text},
-            element výuka {
-               element plán {
-                  attribute id {xsd:token},
-                  (
-                     element přednáška {
-                        specifikace_výuky
-                     }?,
-                     element seminář {
-                        specifikace_výuky
-                     }?,
-                     element cvičení {
-                        (element paralelní_skupina {
-                           specifikace_výuky
-                        }*
-                        |
-                           specifikace_výuky
-                        )
-                     }?
-                  )
-               }+
-               },
-            element anotace {
-               html_text
-            },
-
-            element garant_ref {xsd:token},
-            element studijníliteratura {text},
-            element konzultace {
-               element rozsah {xsd:positiveInteger},
-               element info {text}
-            } #& .\@formastudia = "kombinovaná"
-         }*
-      }
-      
+      }      
    }
 
 
