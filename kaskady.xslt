@@ -133,7 +133,7 @@
     <xsl:template name="getVyučující">
         <xsl:choose>
             <xsl:when test="self::*[paralelní_skupina]">           
-                <xsl:for-each select="*">
+                <xsl:for-each-group select="*" group-by="specifikace_výuky/vyučující_ref">
                     <xsl:variable name="vyučujícíId" select="specifikace_výuky/vyučující_ref" />
                     <xsl:variable name="jménoVyučujícího" select="//vyučující[@id = $vyučujícíId]/jméno_příjmení" />
                     <xsl:variable name="titulyVyučujícíhoPřed" select="//vyučující[@id = $vyučujícíId]/tituly_před" />  
@@ -144,16 +144,16 @@
                     </xsl:if>
                     <xsl:choose>
                         <xsl:when test="../self::cvičení">
-                        <xsl:text> (cvičící)</xsl:text>
+                            <xsl:text> (cvičící)</xsl:text>
                         </xsl:when>
                         <xsl:otherwise>
-                        <xsl:text> (přednášející)</xsl:text>
+                            <xsl:text> (přednášející)</xsl:text>
                         </xsl:otherwise>
                     </xsl:choose>
                     <xsl:if test="position() &lt; last()">
                         <br/>
                     </xsl:if></b>
-                </xsl:for-each>
+                </xsl:for-each-group>
             </xsl:when>
 
             <xsl:otherwise>                                    
@@ -167,10 +167,10 @@
                     </xsl:if>
                     <xsl:choose>
                     <xsl:when test="self::cvičení">
-                    <xsl:text> (cvičící)</xsl:text>
+                        <xsl:text> (cvičící)</xsl:text>
                     </xsl:when>
                     <xsl:otherwise>
-                    <xsl:text> (přednášející)</xsl:text>
+                        <xsl:text> (přednášející)</xsl:text>
                     </xsl:otherwise>
                 </xsl:choose></b>
             </xsl:otherwise>
@@ -740,9 +740,13 @@
                 <td colspan="5">
                     <xsl:variable name="garantId" select="garant_ref" />
                     <xsl:variable name="jménoGaranta" select="//vyučující[@id = $garantId]/jméno_příjmení" />
-                    <xsl:variable name="titulyGaranta" select="//vyučující[@id = $garantId]/tituly" />
+                    <xsl:variable name="titulyGarantaPřed" select="//vyučující[@id = $garantId]/tituly_před" />    
+                        <xsl:variable name="titulyGarantaZa" select="//vyučující[@id = $garantId]/tituly_za" />    
 
-                    <xsl:value-of select="$jménoGaranta" />, <xsl:value-of select="$titulyGaranta"/>
+                        <xsl:value-of select="$titulyGarantaPřed"/><xsl:text> </xsl:text><xsl:value-of select="$jménoGaranta" />
+                        <xsl:if test="$titulyGarantaZa != ''">,
+                            <xsl:value-of select="$titulyGarantaZa"/>
+                        </xsl:if>                  
                 </td>               
             </tr>     
             <tr>
@@ -750,7 +754,8 @@
                 <td colspan="5">
                     <xsl:variable name="garantId" select="garant_ref" />
                     <xsl:variable name="jménoGaranta" select="//vyučující[@id = $garantId]/jméno_příjmení" />
-                    <xsl:variable name="titulyGaranta" select="//vyučující[@id = $garantId]/tituly" />
+                    <xsl:variable name="titulyGarantaPřed" select="//vyučující[@id = $garantId]/tituly_před" />    
+                    <xsl:variable name="titulyGarantaZa" select="//vyučující[@id = $garantId]/tituly_za" />    
             
                     <xsl:variable name="prednasky" select="výuka/plán/*[self::přednáška or self::seminář]//specifikace_výuky/vyučující_ref" />
 
@@ -758,13 +763,19 @@
             
                     <xsl:choose>
                         <xsl:when test="$garantId = $prednasky">
-                            <xsl:value-of select="$jménoGaranta" />, <xsl:value-of select="$titulyGaranta"/>
+                               <xsl:value-of select="$titulyGarantaPřed"/><xsl:text> </xsl:text><xsl:value-of select="$jménoGaranta" />
+                        <xsl:if test="$titulyGarantaZa != ''">,
+                            <xsl:value-of select="$titulyGarantaZa"/>
+                        </xsl:if>                  
                             (<xsl:text>přednášející</xsl:text>)
                         </xsl:when>
                         <xsl:otherwise>
                             <xsl:choose>
                                 <xsl:when test="$garantId =  $cviceni">
-                                    <xsl:value-of select="$jménoGaranta" />, <xsl:value-of select="$titulyGaranta"/>
+                                       <xsl:value-of select="$titulyGarantaPřed"/><xsl:text> </xsl:text><xsl:value-of select="$jménoGaranta" />
+                        <xsl:if test="$titulyGarantaZa != ''">,
+                            <xsl:value-of select="$titulyGarantaZa"/>
+                        </xsl:if>                  
                                     (<xsl:text>cvičící</xsl:text>)
                                 </xsl:when>
                                 <xsl:otherwise>
